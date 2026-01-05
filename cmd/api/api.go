@@ -6,24 +6,37 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
+// create the application structure
 type application struct {
 	config config
 }
 
+// create the application configurations struct
 type config struct {
 	addr string
 }
 
+// mount the application with the routes
 func (app *application) mount() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	r.Get("/health", app.healthCheckHandler)
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Route("/v1", func(r chi.Router) {
+		r.Get("/health", app.healthCheckHandler)
+	})
 
 	return r
 }
 
+// run the application server
 func (app *application) run(r *chi.Mux) error {
 
 	srv := &http.Server{
