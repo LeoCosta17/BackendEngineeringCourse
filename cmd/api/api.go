@@ -1,6 +1,7 @@
 package main
 
 import (
+	"app/internal/store"
 	"log"
 	"net/http"
 	"time"
@@ -12,11 +13,20 @@ import (
 // create the application structure
 type application struct {
 	config config
+	store  store.Storage
 }
 
 // create the application configurations struct
 type config struct {
 	addr string
+	db   dbConfig
+}
+
+type dbConfig struct {
+	addr         string
+	maxOpenConns int
+	maxIdleConns int
+	maxIdleTime  string
 }
 
 // mount the application with the routes
